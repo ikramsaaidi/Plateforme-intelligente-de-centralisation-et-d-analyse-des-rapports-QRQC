@@ -285,3 +285,118 @@ Les endpoints d'authentification ont été testés avec succès.
 - Séparation des rôles entre Access Token et Refresh Token.
 - Centralisation des routes d'authentification dans le fichier `urls.py`.
 - Configuration d'une méthode d'authentification unique pour l'ensemble des futures API REST.
+
+
+# 5. API CRUD – QRQC
+
+## Objectif
+
+Cette première API CRUD permet de gérer les rapports QRQC via Django REST Framework. Elle constitue la base de l'architecture REST du projet et expose les opérations de création, de consultation, de modification et de suppression des rapports QRQC.
+
+Toutes les données sont échangées au format JSON et les endpoints sont protégés par authentification JWT.
+
+---
+
+## Generic Views utilisées
+
+Deux Generic Views de Django REST Framework ont été utilisées afin de limiter la quantité de code et de bénéficier des fonctionnalités CRUD intégrées.
+
+| View | Rôle |
+|------|------|
+| `ListCreateAPIView` | Liste des QRQC et création d'un nouveau QRQC |
+| `RetrieveUpdateDestroyAPIView` | Consultation, modification et suppression d'un QRQC |
+
+---
+
+## Endpoints développés
+
+| Méthode | Endpoint | Description |
+|----------|----------|-------------|
+| GET | `/api/qrqc/` | Retourne la liste des rapports QRQC |
+| POST | `/api/qrqc/` | Crée un nouveau rapport QRQC |
+| GET | `/api/qrqc/{id}/` | Retourne le détail d'un QRQC |
+| PUT | `/api/qrqc/{id}/` | Remplace complètement un QRQC |
+| PATCH | `/api/qrqc/{id}/` | Modifie partiellement un QRQC |
+| DELETE | `/api/qrqc/{id}/` | Supprime un QRQC |
+
+---
+
+## Sécurisation de l'API
+
+L'ensemble des endpoints QRQC est protégé par JWT grâce à la permission :
+
+```python
+permission_classes = [IsAuthenticated]
+```
+
+Toute requête vers cette API nécessite un Access Token valide envoyé dans l'en-tête HTTP :
+
+```
+Authorization: Bearer <access_token>
+```
+
+Une requête sans authentification retourne automatiquement :
+
+```
+401 Unauthorized
+```
+
+---
+
+## Tests réalisés
+
+Les endpoints ont été testés avec Postman.
+
+Les scénarios suivants ont été validés :
+
+- Authentification via JWT
+- Consultation de la liste des QRQC (GET)
+- Création d'un nouveau QRQC (POST)
+- Modification complète d'un QRQC (PUT)
+- Modification partielle d'un QRQC (PATCH)
+- Suppression d'un QRQC (DELETE)
+
+Les réponses HTTP obtenues correspondent aux codes attendus (`200 OK`, `201 Created`, `204 No Content`, `401 Unauthorized`).
+
+---
+
+## Architecture de fonctionnement
+
+```
+Client (Postman / React)
+        │
+        ▼
+Requête HTTP
+        │
+        ▼
+JWT Authentication
+        │
+        ▼
+Permission IsAuthenticated
+        │
+        ▼
+Generic View
+        │
+        ▼
+Serializer
+        │
+        ▼
+Modèle Django
+        │
+        ▼
+PostgreSQL
+        │
+        ▼
+Réponse JSON
+```
+
+---
+
+## Bonnes pratiques appliquées
+
+- Utilisation des Generic Views de Django REST Framework.
+- Séparation des responsabilités entre les modèles, serializers, vues et routes.
+- Protection des endpoints par authentification JWT.
+- Utilisation des codes HTTP standards.
+- Validation automatique des données via les serializers.
+- Tests fonctionnels réalisés avec Postman avant l'intégration du frontend React.
