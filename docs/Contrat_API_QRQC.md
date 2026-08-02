@@ -400,3 +400,113 @@ Réponse JSON
 - Utilisation des codes HTTP standards.
 - Validation automatique des données via les serializers.
 - Tests fonctionnels réalisés avec Postman avant l'intégration du frontend React.
+
+# 7. API des autres modèles
+
+## Objectif
+
+Après la validation des endpoints du modèle QRQC, l'API REST a été étendue aux autres modèles de l'application afin de permettre leur gestion complète depuis le frontend React.
+
+Chaque modèle expose des endpoints CRUD (Create, Read, Update, Delete) développés avec les Generic Views de Django REST Framework. Toutes les routes sont protégées par une authentification JWT afin de garantir que seuls les utilisateurs authentifiés puissent accéder aux ressources.
+
+---
+
+## Generic Views utilisées
+
+Pour chaque modèle, deux vues génériques ont été créées :
+
+- `ListCreateAPIView` : permet de récupérer la liste des enregistrements (`GET`) et d'en créer un nouveau (`POST`).
+- `RetrieveUpdateDestroyAPIView` : permet de consulter (`GET`), modifier (`PUT`, `PATCH`) ou supprimer (`DELETE`) un enregistrement identifié par sa clé primaire.
+
+Chaque vue définit :
+
+- le modèle concerné (`queryset`) ;
+- le serializer utilisé (`serializer_class`) ;
+- la permission d'accès (`permission_classes = [IsAuthenticated]`).
+
+---
+
+## Endpoints développés
+
+### Ligne
+
+| Méthode | Endpoint |
+|----------|----------|
+| GET / POST | `/api/ligne/` |
+| GET / PUT / PATCH / DELETE | `/api/ligne/{id}/` |
+
+### Utilisateur
+
+| Méthode | Endpoint |
+|----------|----------|
+| GET / POST | `/api/utilisateur/` |
+| GET / PUT / PATCH / DELETE | `/api/utilisateur/{id}/` |
+
+### Analyse5Pourquoi
+
+| Méthode | Endpoint |
+|----------|----------|
+| GET / POST | `/api/analyse5pourquoi/` |
+| GET / PUT / PATCH / DELETE | `/api/analyse5pourquoi/{id}/` |
+
+### ContreMesure
+
+| Méthode | Endpoint |
+|----------|----------|
+| GET / POST | `/api/contremesure/` |
+| GET / PUT / PATCH / DELETE | `/api/contremesure/{id}/` |
+
+### SuiviQrqc
+
+| Méthode | Endpoint |
+|----------|----------|
+| GET / POST | `/api/suiviqrqc/` |
+| GET / PUT / PATCH / DELETE | `/api/suiviqrqc/{id}/` |
+
+### PieceJointe
+
+| Méthode | Endpoint |
+|----------|----------|
+| GET / POST | `/api/piecejointe/` |
+| GET / PUT / PATCH / DELETE | `/api/piecejointe/{id}/` |
+
+---
+
+## Tests réalisés
+
+L'ensemble des endpoints a été testé avec Postman.
+
+Les tests effectués ont permis de valider :
+
+- la récupération des données (`GET`) ;
+- la création de nouvelles ressources (`POST`) ;
+- la modification complète (`PUT`) ;
+- la modification partielle (`PATCH`) ;
+- la suppression (`DELETE`) ;
+- l'authentification par JWT ;
+- le téléchargement de fichiers (`multipart/form-data`) pour le modèle `PieceJointe`.
+
+Les réponses HTTP obtenues (`200 OK`, `201 Created`, `204 No Content`, `401 Unauthorized`) correspondent aux comportements attendus de Django REST Framework.
+
+---
+
+## Vérification des relations entre les modèles
+
+Les relations définies par les clés étrangères (`ForeignKey`) ont été vérifiées à travers les différentes requêtes API.
+
+Les tests ont confirmé :
+
+- l'association correcte entre un QRQC et une ligne de production ;
+- l'association correcte entre un QRQC et un utilisateur ;
+- l'association des analyses « 5 Pourquoi » à un QRQC ;
+- l'association des contre-mesures à un QRQC ;
+- l'association des suivis à un QRQC ;
+- l'association des pièces jointes à un QRQC.
+
+Les champs calculés exposés par les serializers (`ligne_nom`, `utilisateur_nom` et `qrqc_numero`) ont confirmé le bon fonctionnement des relations entre les modèles et leur sérialisation dans les réponses JSON.
+
+---
+
+## Résultat
+
+À l'issue de cette étape, l'ensemble des modèles de la plateforme dispose d'une API REST sécurisée permettant les opérations CRUD complètes. Les endpoints sont prêts à être consommés par le frontend React, tandis que les relations entre les différentes ressources sont correctement gérées et restituées dans les réponses JSON.
