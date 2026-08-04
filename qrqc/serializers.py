@@ -52,6 +52,10 @@ class QrqcSerializer(serializers.ModelSerializer):
                 "utilisateur",
                 "utilisateur_nom",
         ]
+        read_only_fields = [
+         "utilisateur",
+         "utilisateur_nom",
+    ]
 
 
 #Analyse des 5 pourquoi

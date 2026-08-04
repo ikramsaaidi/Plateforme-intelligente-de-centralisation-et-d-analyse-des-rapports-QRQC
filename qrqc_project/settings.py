@@ -81,9 +81,7 @@ DATABASES = {
         'NAME': 'qrqc_db' ,
         'USER':'postgres',
         'PASSWORD':'zhournia1',
-        'HOST': 'localhost',
-        'PORT': '5432',
-
+       
     }
 }
 

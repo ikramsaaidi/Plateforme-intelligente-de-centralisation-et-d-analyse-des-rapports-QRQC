@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator,MaxValueValidator
+from django.contrib.auth.models import User
 
 #table ligne :
 class Ligne (models.Model):
@@ -18,9 +19,19 @@ class Ligne (models.Model):
     
 
 #table d'utilisateur :
+class Role(models.TextChoices):
+    ADMIN = "ADMIN", "Administrateur"
+    QUALITY_ENGINEER = "QUALITY_ENGINEER", "Ingénieur Qualité"
+    QUALITY_MANAGER = "QUALITY_MANAGER", "Responsable Qualité"
 class Utilisateur (models.Model) :
+    user = models.OneToOneField(
+        User,
+        on_delete=models.PROTECT,
+        related_name="profil"
+    )
     nom_complet=models.CharField(max_length=100,) 
-    role=models.CharField(max_length=50)  
+    role=models.CharField(max_length=50,
+                          choices=Role.choices)  
     def __str__(self):
        return f"{self.nom_complet} - {self.role}"   
 
