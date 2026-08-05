@@ -510,3 +510,427 @@ Les champs calculés exposés par les serializers (`ligne_nom`, `utilisateur_nom
 ## Résultat
 
 À l'issue de cette étape, l'ensemble des modèles de la plateforme dispose d'une API REST sécurisée permettant les opérations CRUD complètes. Les endpoints sont prêts à être consommés par le frontend React, tandis que les relations entre les différentes ressources sont correctement gérées et restituées dans les réponses JSON.
+
+# Authentification, gestion des rôles et permissions
+
+## Objectif
+
+Mettre en place un système sécurisé d'authentification et d'autorisation afin de contrôler l'accès aux différentes fonctionnalités de l'application QRQC selon le rôle de chaque utilisateur.
+
+---
+
+# Technologies utilisées
+
+- Django REST Framework
+- Simple JWT
+- PostgreSQL
+- Permissions personnalisées (Custom Permissions)
+
+---
+
+# Fonctionnalités réalisées
+
+## 1. Authentification JWT
+
+Le système utilise **JSON Web Token (JWT)**.
+
+Lorsqu'un utilisateur saisit un nom d'utilisateur et un mot de passe valides, le serveur retourne :
+
+- Access Token
+- Refresh Token
+
+L'Access Token est ensuite utilisé pour authentifier toutes les requêtes envoyées par le frontend React vers l'API Django.
+
+---
+
+## 2. Gestion des utilisateurs
+
+Deux modèles sont utilisés :
+
+- **User** : modèle d'authentification fourni par Django.
+- **Utilisateur** : profil métier de l'application.
+
+Le modèle `Utilisateur` est relié au modèle `User` grâce à une relation `OneToOneField`.
+
+```python
+user = models.OneToOneField(
+    User,
+    on_delete=models.PROTECT,
+    related_name="profil"
+)
+```
+
+Cette séparation permet :
+
+- d'utiliser le système d'authentification sécurisé de Django ;
+- d'ajouter des informations métier (nom complet, rôle) sans modifier le modèle `User`.
+
+---
+
+## 3. Gestion des rôles
+
+Trois rôles ont été définis :
+
+- Administrateur
+- Ingénieur Qualité
+- Responsable Qualité
+
+Chaque utilisateur possède un rôle enregistré dans son profil.
+
+---
+
+## 4. Permissions personnalisées
+
+Une classe de base `HasRole` a été créée afin d'éviter la duplication du code.
+
+À partir de cette classe, plusieurs permissions ont été développées :
+
+- `IsAdministrator`
+- `IsQualityEngineer`
+- `IsAdministratorOrEngineer`
+
+Ces permissions sont utilisées dans les vues Django REST Framework afin de limiter les opérations autorisées selon le rôle de l'utilisateur connecté.
+
+---
+
+## 5. Contrôle des accès
+
+Les permissions implémentées sont résumées dans le tableau suivant :
+
+| Fonctionnalité | Administrateur | Ingénieur Qualité | Responsable Qualité |
+|---------------|:--------------:|:-----------------:|:-------------------:|
+| Consulter les QRQC | ✅ | ✅ | ✅ |
+| Créer un QRQC | ❌ | ✅ | ❌ |
+| Modifier un QRQC | ❌ | ✅ | ❌ |
+| Supprimer un QRQC | ❌ | ✅ | ❌ |
+| Consulter les utilisateurs | ✅ | ✅ | ✅ |
+| Gérer les utilisateurs | ✅ | ❌ | ❌ |
+| Consulter les lignes | ✅ | ✅ | ✅ |
+| Ajouter une ligne | ✅ | ✅ | ❌ |
+| Modifier une ligne | ✅ | ❌ | ❌ |
+| Supprimer une ligne | ✅ | ❌ | ❌ |
+| Consulter les analyses | ✅ | ✅ | ✅ |
+| Gérer les analyses | ❌ | ✅ | ❌ |
+| Consulter les contre-mesures | ✅ | ✅ | ✅ |
+| Gérer les contre-mesures | ❌ | ✅ | ❌ |
+| Consulter le suivi | ✅ | ✅ | ✅ |
+| Gérer le suivi | ❌ | ✅ | ❌ |
+| Consulter les pièces jointes | ✅ | ✅ | ✅ |
+| Gérer les pièces jointes | ❌ | ✅ | ❌ |
+
+---
+
+## 6. Association automatique du créateur d'un QRQC
+
+Lors de la création d'un QRQC, l'utilisateur connecté est automatiquement enregistré comme responsable du QRQC.
+
+Cette fonctionnalité est implémentée dans la méthode `perform_create()`.
+
+```python
+def perform_create(self, serializer):
+    serializer.save(utilisateur=self.request.user.profil)
+```
+
+Ainsi :
+
+- le frontend ne transmet jamais l'identifiant de l'utilisateur ;
+- le backend récupère automatiquement l'utilisateur authentifié ;
+- le Responsable Qualité peut identifier l'ingénieur ayant créé chaque QRQC.
+
+---
+
+## 7. Sécurisation des endpoints
+
+Chaque vue utilise la méthode `get_permissions()` afin d'appliquer dynamiquement les permissions selon le type de requête HTTP.
+
+Principe général :
+
+- **GET** → accessible à tous les utilisateurs authentifiés.
+- **POST / PUT / PATCH / DELETE** → accessible uniquement aux rôles autorisés.
+
+Cette approche permet une gestion centralisée et évolutive des droits d'accès.
+
+---
+
+# Tests réalisés
+
+Les scénarios suivants ont été validés avec Postman.
+
+### Ingénieur Qualité
+
+- Authentification via JWT.
+- Création d'un QRQC.
+- Modification d'un QRQC.
+- Suppression d'un QRQC.
+- Ajout d'une ligne.
+- Création des analyses.
+- Création des contre-mesures.
+- Création du suivi.
+- Ajout de pièces jointes.
+
+### Responsable Qualité
+
+- Consultation de toutes les ressources.
+- Interdiction de création, modification et suppression.
+
+### Administrateur
+
+- Gestion des utilisateurs.
+- Gestion des lignes.
+- Consultation de toutes les ressources.
+- Interdiction de créer, modifier ou supprimer un QRQC.
+
+Tous les tests réalisés avec Postman ont confirmé le bon fonctionnement du système de permissions.
+
+---
+
+# Résultat obtenu
+
+À l'issue de cette tâche, le backend dispose d'un système complet de sécurité permettant :
+
+- une authentification sécurisée par JWT ;
+- une gestion des rôles utilisateurs ;
+- un contrôle d'accès basé sur des permissions personnalisées ;
+- l'enregistrement automatique du créateur de chaque QRQC ;
+- la protection de l'ensemble des endpoints REST de l'application.
+
+Cette étape constitue le socle de sécurité du projet et garantit une communication sécurisée entre le frontend React et l'API Django.
+
+# Recherche multicritère des QRQC
+
+## Objectif
+
+Mettre en place un système de recherche multicritère permettant aux utilisateurs de retrouver rapidement un ou plusieurs QRQC selon différents critères, sans avoir à parcourir toute la base de données.
+
+Cette fonctionnalité améliore l'efficacité de la consultation des rapports et sera utilisée par l'interface React.
+
+---
+
+# Technologies utilisées
+
+- Django REST Framework
+- django-filter
+
+Installation :
+
+```bash
+pip install django-filter
+```
+
+---
+
+# Configuration
+
+## Ajout de l'application
+
+Dans `settings.py` :
+
+```python
+INSTALLED_APPS = [
+    ...
+    "django_filters",
+]
+```
+
+---
+
+## Configuration de Django REST Framework
+
+```python
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ],
+}
+```
+
+---
+
+# Création du fichier `filters.py`
+
+Un fichier `filters.py` a été créé afin de centraliser tous les critères de recherche des QRQC.
+
+La classe principale est :
+
+```python
+QrqcFilter(FilterSet)
+```
+
+Elle contient les filtres suivants :
+
+| Critère | Type |
+|---------|------|
+| Numéro QRQC | Recherche exacte |
+| Famille | Recherche partielle |
+| Référence faisceau | Recherche partielle |
+| Détecté par | Recherche partielle |
+| Mode de détection | Recherche partielle |
+| Escalade Niveau 2 | Booléen |
+| Date de création | Intervalle |
+| Date de détection | Intervalle |
+| Utilisateur | Foreign Key |
+| Ligne | Foreign Key |
+
+---
+
+# Intégration dans la vue
+
+Le filtre a été associé à l'API des QRQC :
+
+```python
+filterset_class = QrqcFilter
+```
+
+Ainsi, chaque requête GET peut être filtrée automatiquement via les paramètres de l'URL.
+
+---
+
+# Exemples d'utilisation
+
+## Recherche par numéro
+
+```http
+GET /api/qrqc/?numero_qrqc=1001
+```
+
+---
+
+## Recherche par famille
+
+```http
+GET /api/qrqc/?famille=Moteur
+```
+
+---
+
+## Recherche par référence faisceau
+
+```http
+GET /api/qrqc/?reference_faisceau=FH-001
+```
+
+---
+
+## Recherche par Team Leader
+
+```http
+GET /api/qrqc/?detecte_par=Ali
+```
+
+---
+
+## Recherche par mode de détection
+
+```http
+GET /api/qrqc/?mode_detection=Audit
+```
+
+---
+
+## Recherche par utilisateur
+
+```http
+GET /api/qrqc/?utilisateur=Ikram
+```
+
+---
+
+## Recherche par ligne
+
+```http
+GET /api/qrqc/?ligne=AA
+```
+
+---
+
+## Recherche par escalade
+
+```http
+GET /api/qrqc/?escalade_niv2=true
+```
+
+ou
+
+```http
+GET /api/qrqc/?escalade_niv2=false
+```
+
+---
+
+## Recherche par date de création
+
+Après une date :
+
+```http
+GET /api/qrqc/?date_creation_after=2026-08-01
+```
+
+Avant une date :
+
+```http
+GET /api/qrqc/?date_creation_before=2026-08-31
+```
+
+Entre deux dates :
+
+```http
+GET /api/qrqc/?date_creation_after=2026-08-01&date_creation_before=2026-08-31
+```
+
+---
+
+# Recherche multicritère
+
+Plusieurs critères peuvent être combinés dans une seule requête.
+
+Exemple :
+
+```http
+GET /api/qrqc/?famille=Moteur&utilisateur=Ikram
+```
+
+ou
+
+```http
+GET /api/qrqc/?famille=Moteur&ligne=AA
+```
+
+ou
+
+```http
+GET /api/qrqc/?famille=Moteur&utilisateur=Ikram&escalade_niv2=false
+```
+
+Le système retourne uniquement les QRQC qui satisfont simultanément tous les critères.
+
+---
+
+# Tests réalisés
+
+Les tests suivants ont été validés avec Postman :
+
+- Consultation sans filtre
+- Recherche par numéro
+- Recherche par famille
+- Recherche par référence faisceau
+- Recherche par Team Leader
+- Recherche par mode de détection
+- Recherche par utilisateur
+- Recherche par ligne
+- Recherche par dates
+- Recherche par escalade
+- Recherche multicritère
+
+Tous les tests retournent les résultats attendus.
+
+---
+
+# Résultat
+
+Le backend dispose désormais d'un moteur de recherche multicritère entièrement fonctionnel.
+
+Cette API est prête à être consommée par le frontend React pour implémenter une interface de recherche avancée.

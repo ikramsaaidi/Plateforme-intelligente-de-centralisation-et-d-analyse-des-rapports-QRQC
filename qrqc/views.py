@@ -8,9 +8,16 @@ from .permission import (
     IsQualityEngineer,
     IsAdministratorOrEngineer,
 )
+from .filters import QrqcFilter
+
+
+
+
+
 class QrqcListCreateAPIView(generics.ListCreateAPIView):
     queryset = Qrqc.objects.all()
     serializer_class = QrqcSerializer
+    filterset_class = QrqcFilter
     def get_permissions(self):
 
         if self.request.method == "GET":
