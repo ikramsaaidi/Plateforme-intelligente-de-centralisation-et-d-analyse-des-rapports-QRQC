@@ -934,3 +934,207 @@ Tous les tests retournent les résultats attendus.
 Le backend dispose désormais d'un moteur de recherche multicritère entièrement fonctionnel.
 
 Cette API est prête à être consommée par le frontend React pour implémenter une interface de recherche avancée.
+
+# Frontend - Plateforme QRQC
+
+## Introduction
+
+Après la réalisation du backend (API REST, authentification JWT, gestion des rôles, permissions, CRUD et recherche multicritère), cette deuxième phase du projet consiste à développer l'interface utilisateur de la plateforme QRQC.
+
+L'objectif est de créer une application web moderne, ergonomique et responsive permettant aux différents acteurs (Administrateur, Ingénieur Qualité et Responsable Qualité) d'interagir facilement avec les fonctionnalités du système.
+
+Le frontend sera développé avec **React.js** afin d'obtenir une interface dynamique, modulaire et facilement maintenable. La communication avec le backend Django REST Framework sera réalisée via des requêtes HTTP sécurisées par JWT.
+
+---
+
+# Objectifs du Frontend
+
+Le frontend devra permettre de :
+
+- Authentifier les utilisateurs.
+- Consulter le tableau de bord.
+- Gérer les QRQC.
+- Consulter et compléter les analyses des QRQC.
+- Gérer les lignes de production.
+- Gérer les utilisateurs (Administrateur).
+- Consulter les statistiques.
+- Fournir une interface intuitive et professionnelle.
+
+---
+
+# Technologies utilisées
+
+- React.js
+- Vite
+- Tailwind CSS
+- React Router DOM
+- Axios
+- React Hook Form
+- React Icons
+- React Toastify
+
+---
+
+# Phase 1 — Conception UI/UX
+
+## Objectif
+
+Avant de commencer le développement React, une phase de conception a été réalisée afin de définir l'architecture de l'application, son ergonomie ainsi que son identité visuelle.
+
+Cette étape permet de disposer d'une vision claire de l'application avant l'implémentation.
+
+---
+
+## Utilisateurs
+
+L'application est destinée à trois types d'utilisateurs :
+
+### Administrateur
+
+- Gérer les utilisateurs
+- Gérer les lignes
+- Consulter toutes les informations
+
+### Ingénieur Qualité
+
+- Créer un QRQC
+- Modifier un QRQC
+- Ajouter les analyses
+- Ajouter les contre-mesures
+- Effectuer le suivi
+- Gérer les pièces jointes
+
+### Responsable Qualité
+
+- Consulter les QRQC
+- Consulter les statistiques
+- Consulter les analyses
+
+---
+
+## Architecture des écrans
+
+L'application est composée de sept écrans principaux :
+
+1. Login
+2. Dashboard
+3. Gestion des QRQC
+4. Détail d'un QRQC
+5. Gestion des lignes
+6. Gestion des utilisateurs
+7. Mon Profil
+
+---
+
+## Navigation
+
+Une Sidebar permet d'accéder aux différentes fonctionnalités.
+
+Selon le rôle de l'utilisateur, certains menus seront automatiquement masqués.
+
+### Administrateur
+
+- Dashboard
+- Gestion des QRQC
+- Lignes
+- Utilisateurs
+- Mon Profil
+
+### Ingénieur Qualité
+
+- Dashboard
+- Gestion des QRQC
+- Lignes
+- Mon Profil
+
+### Responsable Qualité
+
+- Dashboard
+- Gestion des QRQC
+- Mon Profil
+
+---
+
+## Organisation de la fiche QRQC
+
+Au lieu de créer une page indépendante pour chaque modèle de la base de données, toutes les informations liées à un QRQC seront regroupées dans une seule fiche.
+
+Cette fiche contiendra plusieurs onglets :
+
+- Informations générales
+- Analyse des 5 Pourquoi
+- Contre-mesures
+- Suivi QRQC
+- Pièces jointes
+
+Cette approche améliore l'expérience utilisateur et se rapproche du fonctionnement des logiciels professionnels.
+
+---
+
+## Composants réutilisables
+
+Afin de faciliter la maintenance de l'application, plusieurs composants seront développés puis réutilisés dans tout le projet.
+
+Exemples :
+
+- Button
+- Input
+- Select
+- Table
+- Card
+- Modal
+- SearchBar
+- Pagination
+- Loader
+- Toast Notification
+- Confirm Dialog
+
+---
+
+## Charte graphique
+
+L'interface respecte l'identité visuelle de **Sumitomo Electric Wiring Systems (SEWS)**.
+
+| Usage | Couleur | Code |
+|--------|----------|--------|
+| Couleur principale | Bleu marine Sumitomo | #074784 |
+| Accent | Cyan Sumitomo | #0B96B7 |
+| Sidebar | Bleu marine profond | #052F57 |
+| Fond général | Gris très clair | #F8FAFC |
+| Cartes | Blanc | #FFFFFF |
+| Texte principal | Gris anthracite | #1F2937 |
+| Bordures | Gris clair | #E5E7EB |
+| Succès | Vert | #22C55E |
+| Avertissement | Orange | #F59E0B |
+| Erreur | Rouge | #EF4444 |
+
+---
+
+## Principes de conception
+
+L'interface respecte les principes suivants :
+
+- Design moderne et épuré.
+- Navigation simple et intuitive.
+- Responsive Design.
+- Composants réutilisables.
+- Cohérence graphique.
+- Accessibilité.
+- Performance.
+
+---
+
+## Livrables de cette phase
+
+À la fin de cette étape, les éléments suivants sont définis :
+
+- Architecture générale de l'application.
+- Navigation entre les écrans.
+- Liste des utilisateurs.
+- Liste des écrans.
+- Organisation de la fiche QRQC.
+- Liste des composants réutilisables.
+- Charte graphique.
+- Principes de conception UI/UX.
+
+Cette phase constitue la base de développement de toutes les interfaces React qui seront implémentées dans les étapes suivantes.
