@@ -1,10 +1,25 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
+
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-blue-500">
-      <h1 className="text-5xl font-bold text-white">
-        Tailwind fonctionne !
-      </h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+
+        {/* Redirection automatique vers Login */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
+        {/* Page Login */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Les prochaines pages seront ajoutées ici */}
+        {/*
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/qrqc" element={<QrqcList />} />
+        */}
+
+      </Routes>
+    </BrowserRouter>
   );
 }
 
