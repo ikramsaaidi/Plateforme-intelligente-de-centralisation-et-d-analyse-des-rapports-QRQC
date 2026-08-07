@@ -1,22 +1,21 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Login from "./pages/Login";
+import Layout from "./components/Layout";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* Redirection automatique vers Login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-
-        {/* Page Login */}
+        {/* Page de connexion */}
         <Route path="/login" element={<Login />} />
 
-        {/* Les prochaines pages seront ajoutées ici */}
-        {/*
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/qrqc" element={<QrqcList />} />
-        */}
+        {/* Layout principal */}
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Dashboard />} />
+        </Route>
 
       </Routes>
     </BrowserRouter>
